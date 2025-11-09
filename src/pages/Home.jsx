@@ -10,6 +10,12 @@ const Home = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [categories, setCategories] = useState(['All']);
+  const [imageErrors, setImageErrors] = useState(new Set());
+
+  // Handle image loading errors
+  const handleImageError = (blogId) => {
+    setImageErrors((prev) => new Set([...prev, blogId]));
+  };
 
   useEffect(() => {
     loadBlogs();
@@ -52,13 +58,19 @@ const Home = () => {
           className="relative h-[500px] overflow-hidden bg-gradient-to-r from-teal-600 to-teal-800"
         >
           <div className="absolute inset-0 bg-black opacity-40"></div>
-          {featuredBlog.image && (
+          {featuredBlog.image && !imageErrors.has(`featured-${featuredBlog.id}`) ? (
             <img
               src={featuredBlog.image}
               alt={featuredBlog.title}
               className="w-full h-full object-cover"
+              onError={() => handleImageError(`featured-${featuredBlog.id}`)}
+              loading="lazy"
             />
-          )}
+          ) : featuredBlog.image && imageErrors.has(`featured-${featuredBlog.id}`) ? (
+            <div className="w-full h-full bg-gradient-to-br from-teal-400 to-teal-600 flex items-center justify-center">
+              <span className="text-white text-lg font-semibold">Image unavailable</span>
+            </div>
+          ) : null}
           <div className="absolute inset-0 flex items-center justify-center">
             <div className="max-w-4xl mx-auto px-4 text-center text-white z-10">
               <motion.div
@@ -131,15 +143,21 @@ const Home = () => {
                 className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-shadow"
               >
                 <Link to={`/blog/${blog.id}`}>
-                  {blog.image && (
-                    <div className="h-48 overflow-hidden">
+                  {blog.image && !imageErrors.has(blog.id) ? (
+                    <div className="h-48 overflow-hidden bg-gray-200">
                       <img
                         src={blog.image}
                         alt={blog.title}
                         className="w-full h-full object-cover hover:scale-110 transition-transform duration-300"
+                        onError={() => handleImageError(blog.id)}
+                        loading="lazy"
                       />
                     </div>
-                  )}
+                  ) : blog.image && imageErrors.has(blog.id) ? (
+                    <div className="h-48 bg-gradient-to-br from-teal-100 to-teal-200 flex items-center justify-center">
+                      <span className="text-teal-600 text-sm font-medium">Image unavailable</span>
+                    </div>
+                  ) : null}
                   <div className="p-6">
                     <div className="flex items-center justify-between mb-2">
                       <span className="px-3 py-1 text-xs font-semibold text-teal-600 bg-teal-50 rounded-full">

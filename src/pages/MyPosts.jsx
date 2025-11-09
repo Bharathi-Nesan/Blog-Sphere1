@@ -9,6 +9,12 @@ const MyPosts = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [myBlogs, setMyBlogs] = useState([]);
+  const [imageErrors, setImageErrors] = useState(new Set());
+
+  // Handle image loading errors
+  const handleImageError = (blogId) => {
+    setImageErrors((prev) => new Set([...prev, blogId]));
+  };
 
   useEffect(() => {
     if (!user) {
@@ -71,15 +77,21 @@ const MyPosts = () => {
                 className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-shadow"
               >
                 <Link to={`/blog/${blog.id}`}>
-                  {blog.image && (
-                    <div className="h-48 overflow-hidden">
+                  {blog.image && !imageErrors.has(blog.id) ? (
+                    <div className="h-48 overflow-hidden bg-gray-200">
                       <img
                         src={blog.image}
                         alt={blog.title}
                         className="w-full h-full object-cover hover:scale-110 transition-transform duration-300"
+                        onError={() => handleImageError(blog.id)}
+                        loading="lazy"
                       />
                     </div>
-                  )}
+                  ) : blog.image && imageErrors.has(blog.id) ? (
+                    <div className="h-48 bg-gradient-to-br from-teal-100 to-teal-200 flex items-center justify-center">
+                      <span className="text-teal-600 text-sm font-medium">Image unavailable</span>
+                    </div>
+                  ) : null}
                   <div className="p-6">
                     <div className="flex items-center justify-between mb-2">
                       <span className="px-3 py-1 text-xs font-semibold text-teal-600 bg-teal-50 rounded-full">

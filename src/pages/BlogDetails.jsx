@@ -27,6 +27,8 @@ const BlogDetails = () => {
   const [editCommentText, setEditCommentText] = useState('');
   const [showShareModal, setShowShareModal] = useState(false);
   const [relatedBlogs, setRelatedBlogs] = useState([]);
+  const [imageError, setImageError] = useState(false);
+  const [relatedImageErrors, setRelatedImageErrors] = useState(new Set());
 
   useEffect(() => {
     loadBlog();
@@ -163,15 +165,21 @@ const BlogDetails = () => {
           animate={{ opacity: 1, y: 0 }}
           className="bg-white rounded-2xl shadow-xl overflow-hidden"
         >
-          {blog.image && (
+          {blog.image && !imageError ? (
             <div className="h-96 overflow-hidden">
               <img
                 src={blog.image}
                 alt={blog.title}
                 className="w-full h-full object-cover"
+                onError={() => setImageError(true)}
+                loading="lazy"
               />
             </div>
-          )}
+          ) : blog.image && imageError ? (
+            <div className="h-96 bg-gradient-to-br from-teal-400 to-teal-600 flex items-center justify-center">
+              <span className="text-white text-lg font-semibold">Image unavailable</span>
+            </div>
+          ) : null}
 
           <div className="p-8">
             <div className="flex items-center justify-between mb-4">
@@ -357,15 +365,21 @@ const BlogDetails = () => {
                   to={`/blog/${relatedBlog.id}`}
                   className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-shadow"
                 >
-                  {relatedBlog.image && (
-                    <div className="h-40 overflow-hidden">
+                  {relatedBlog.image && !relatedImageErrors.has(relatedBlog.id) ? (
+                    <div className="h-40 overflow-hidden bg-gray-200">
                       <img
                         src={relatedBlog.image}
                         alt={relatedBlog.title}
                         className="w-full h-full object-cover hover:scale-110 transition-transform duration-300"
+                        onError={() => setRelatedImageErrors((prev) => new Set([...prev, relatedBlog.id]))}
+                        loading="lazy"
                       />
                     </div>
-                  )}
+                  ) : relatedBlog.image && relatedImageErrors.has(relatedBlog.id) ? (
+                    <div className="h-40 bg-gradient-to-br from-teal-100 to-teal-200 flex items-center justify-center">
+                      <span className="text-teal-600 text-xs font-medium">Image unavailable</span>
+                    </div>
+                  ) : null}
                   <div className="p-4">
                     <h3 className="font-bold text-gray-900 mb-2 line-clamp-2">
                       {relatedBlog.title}
