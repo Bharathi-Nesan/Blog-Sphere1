@@ -1,6 +1,8 @@
+import { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import { AuthProvider } from './context/AuthContext';
+import { seedBlogs } from './utils/storage';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import Home from './pages/Home';
@@ -12,6 +14,11 @@ import MyPosts from './pages/MyPosts';
 import EditPost from './pages/EditPost';
 
 function App() {
+  useEffect(() => {
+    // Seed sample blogs if none exist
+    seedBlogs();
+  }, []);
+
   return (
     <AuthProvider>
       <Router>
